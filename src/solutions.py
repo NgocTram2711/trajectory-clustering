@@ -12,6 +12,10 @@ from shapely import LineString
 from sklearn.cluster import DBSCAN
 
 from src.utils import find_closest_segment
+import os
+from webdriver_manager.chrome import ChromeDriverManager
+driver_path = ChromeDriverManager().install()
+os.environ["BOKEH_CHROMEDRIVER_PATH"] = driver_path
 
 
 class Solution:
@@ -84,14 +88,17 @@ class Tca(Solution):
             return
 
         print(f"SOLVING TCA ({self.min_d}, {self.max_d})...")
+        print(self.traj_collection.data)
         aggregator = mpd.TrajectoryCollectionAggregator(
             self.traj_collection.data,
-            min_distance=self.min_d,
-            max_distance=self.max_d,
-            min_stop_duration=timedelta(minutes=self.minutes)
+            min_distance=self.min_d, #khoảng cách tối thiểu giữa các điểm
+            max_distance=self.max_d, #khoảng cách tối đa giữa các điểm
+            min_stop_duration=timedelta(minutes=self.minutes) #thời gian dừng tối thiểu
         )
-        self.clusters = aggregator.get_clusters_gdf()
-        self.flows = aggregator.get_flows_gdf()
+        self.clusters = aggregator.get_clusters_gdf()  #lấy ra các cụm dưới dạng GeoDataFrame
+        print("clusters", self.clusters)
+        self.flows = aggregator.get_flows_gdf() #lấy ra các flow giữa các cụm
+        print("flows", self.flows)
         self.clean()
         if self.should_cluster:
             self.cluster_points()
@@ -111,11 +118,11 @@ class Tca(Solution):
             weight = row_i["weight"]
             obj_weight = row_i["obj_weight"]
     
-            for j, row_j in self.flows.iterrows():
+            for j, row_j in self.flows.iterrows(): #kiểm tra nếu có flow nào khác trùng nhưng ngược chiều ko
                 line_j = row_j["geometry"]
                 if i != j and j not in visited and line_i.equals(LineString(line_j.coords[::-1])):
                     weight += row_j["weight"]
-                    obj_weight += row_j["obj_weight"]
+                    obj_weight += row_j["obj_weight"] #nếu có thì cộng thêm weight, obj_weight của flow j vào flow i
                     visited.add(j)
     
             merged_flows.append({

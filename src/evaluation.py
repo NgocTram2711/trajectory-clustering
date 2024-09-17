@@ -35,17 +35,28 @@ class Evaluation:
 
         scores = []
         for i, (p1, p2) in enumerate(self.grid):
+            print("p1", p1)
+            print("p2", p2)
+
             solution = self.SolutionClass(self.root, self.traj_collection, p1, p2)
+            print("Start solution.solve", i)
             solution.solve()
+            print("End solution.solve", i)
             clusters = set(solution.labels_)
-            if len(clusters) == 1 or (len(clusters) == 2 and -1 in clusters) or len(clusters) > 100:
+            print("clusters", clusters)
+            if len(clusters) == 1 or (len(clusters) == 2 and -1 in clusters) or len(clusters) > 100: #Nếu chỉ có một cụm, hoặc có hai cụm và một trong số đó là -1 hoặc nhiều hơn 100 cụm => solution tệ, bỏ qua 
                 print("POOR SOLUTION")
-                scores.append(None)
+                scores.append((-1,-1))
                 continue
+            
+            print("solution.X", solution.X)
+            print("solution.labels_", solution.labels_)
             scores.append((
                 silhouette_score(solution.X, solution.labels_),
                 calinski_harabasz_score(solution.X, solution.labels_)
             ))
+
+            print("scores i = " , scores)
             del solution
         self.scores = scores
         self.save()
@@ -64,8 +75,8 @@ class Evaluation:
             param_labels = [f"{p[0]}_{p[1]}" for p in self.grid]
         else:
             param_labels = [f"{p[0]:.5f}_{p[1]}" for p in self.grid]
-        score1 = [s[0] for s in self.scores]
-        score2 = [s[1] for s in self.scores]
+        score1 = [s[0] if s is not None else 0 for s in self.scores]
+        score2 = [s[1] if s is not None else 0 for s in self.scores]
 
         fig, ax1 = plt.subplots(figsize=(10, 6))
         ax1.plot(param_labels, score1, color="b")

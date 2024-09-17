@@ -41,9 +41,11 @@ class OSMTraces:
         print("DOWNLOADING...")
         page = 0
         bbox = ",".join([str(b) for b in self.bbox])
+        print(bbox)
         while True:
             file_name = os.path.join(self.root, f"tracks({page}).gpx")
             url = f"{self.API_URL}?bbox={bbox}&page={page}"
+            print(url)
             urlretrieve(url, file_name)
             if not contains_gpx_data(file_name):
                 os.remove(file_name)
@@ -90,11 +92,11 @@ class OSMTraces:
             return
 
         print("CLEANING DATA...")
-        self.data = mpd.DouglasPeuckerGeneralizer(self.data).generalize(tolerance=0.0001)
+        self.data = mpd.DouglasPeuckerGeneralizer(self.data).generalize(tolerance=0.0001) #tolerance=0.0001 thuật toán được phép loại bỏ các điểm dữ liệu nhỏ hơn ngưỡng này
         new_data = []
         for i, track in enumerate(self.trajectories):
-            for j, traj in enumerate(mpd.ObservationGapSplitter(track).split(gap=timedelta(minutes=30)).trajectories):
-                if len(traj.df.index) < 10:
+            for j, traj in enumerate(mpd.ObservationGapSplitter(track).split(gap=timedelta(minutes=30)).trajectories): #chia trajectory thành các phần nhỏ hơn nếu gap > 30 phút
+                if len(traj.df.index) < 10: # nếu trajectory con ít hơn 10 điểm thì bỏ qua
                     continue
                 new_data.append(traj)
         self.data = mpd.TrajectoryCollection(new_data)
@@ -109,7 +111,7 @@ class OSMTraces:
     def save(self):
         if not self._check_exists("osm_traces.pkl"):
             print("SAVING DATA...")
-            with open(os.path.join(self.root, "osm_traces.pkl"), "wb") as f:
+            with open(os.path.join(self.root, "osm_traces.pkl"), "wb") as f: #ghi dữ liệu nhị phân
                 pickle.dump(self.data, f)
 
     def plot(self, file_name):
