@@ -29,15 +29,16 @@ def main():
     best_index = np.argmax(tca_evaluation.scores, axis=0)[0]
     print("tca_evaluation.scores shape", len(tca_evaluation.scores))
     print("tca_evaluation.scores", tca_evaluation.scores)
+    # summax_index = np.argmax(np.sum(tca_evaluation.scores, axis=1))
     min_d, max_d = tca_evaluation.grid[best_index]
     print("min_d", min_d)
     print("max_d", max_d)
-    print("Start TCA")
+    # print("tca_evaluation.scores", tca_evaluation.scores[best_index])
     tca = Tca(results_folder, osm_traces, min_d, max_d, should_cluster=False)
     tca.plot(f"{images_folder}/tca_{min_d}_{max_d}.png")
     tca.cluster_points()
-    # tca.plot(f"{images_folder}/tca_{min_d}_{max_d}_t.png", mode="trajectories")
-    tca.plot(f"{images_folder}/tca_{min_d}_{max_d}_p.png", mode="points")
+    tca.plot(f"{images_folder}/tca_{min_d}_{max_d}_t.png", mode="trajectories")
+    # tca.plot(f"{images_folder}/tca_{min_d}_{max_d}_p.png", mode="points")
 
     dbscan_grid = list(product(np.linspace(1e-4, 1e-3, 14), np.arange(5, 21, 5)))
     dbscan_evaluation = Evaluation(results_folder, osm_traces, Dbscan, dbscan_grid, "dbscan.pkl")
@@ -45,10 +46,11 @@ def main():
     print("dbscan_evaluation.scores shape", len(dbscan_evaluation.scores))
     print("dbscan_evaluation.scores", dbscan_evaluation.scores)
     best_index = np.argmax(dbscan_evaluation.scores, axis=0)[0]
+    # summax_index = np.argmax(np.sum(dbscan_evaluation.scores, axis=1))
     eps, min_samples = dbscan_evaluation.grid[best_index]
     dbscan = Dbscan(results_folder, osm_traces, eps, min_samples)
-    # dbscan.plot(f"{images_folder}/dbscan_{eps:.5f}_{min_samples}_t.png", mode="trajectories")
-    dbscan.plot(f"{images_folder}/dbscan_{eps:.5f}_{min_samples}_p.png", mode="points")
+    dbscan.plot(f"{images_folder}/dbscan_{eps:.5f}_{min_samples}_t.png", mode="trajectories")
+    # dbscan.plot(f"{images_folder}/dbscan_{eps:.5f}_{min_samples}_p.png", mode="points")
 
 
 if __name__ == "__main__":
@@ -57,7 +59,7 @@ if __name__ == "__main__":
 
     #[[[106.6926232751,10.7831414052],[106.7091349538,10.7831414052],[106.7091349538,10.7910353047],[106.6926232751,10.7910353047],[106.6926232751,10.7831414052]]]
     #106.6926,10.7831,106.7091,10.7910
-
+#[[[106.6998890404,10.7882031027],[106.7189005379,10.7882031027],[106.7189005379,10.7989529073],[106.6998890404,10.7989529073],[106.6998890404,10.7882031027]]]
     #[[[106.705275255,10.7982993007],[106.7185253675,10.7982993007],[106.7185253675,10.8036108385],[106.705275255,10.8036108385],[106.705275255,10.7982993007]]]
     #106.7052,10.7982,106.71852,10.8036
     x0, x1 = 106.7052,106.7185210
